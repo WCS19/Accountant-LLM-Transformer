@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-# from config import openai_api_key
+
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
@@ -13,16 +13,54 @@ st.title('TaxBot')
 chat = ChatOpenAI(openai_api_key=openai_api_key)
 memory = ConversationBufferMemory()
 
-template =  '''
-You are a Tax professional. 
+
+# Define multiple templates
+templates = {
+    "Accounting Professional": '''
+You are a senior Accounting Professional. 
 You are talking to a junior accountant. 
 Please answer as honestly as possible. 
 Please feel free to ask clarifying questions if more context is needed. 
 If asked to calculate anything, do not assume any numerical dollar values, ask for exact amounts.
+''',
+    "Audit Professional": '''
+You are an Audit Professional. 
+You are talking to a junior auditor. 
+Please answer as honestly as possible. 
+Please feel free to ask clarifying questions if more context is needed.
+''',
+    "Taxation Professional": '''
+You are a Taxation Professional. 
+You are talking to a junior tax associate. 
+Please answer as honestly as possible. 
+Please feel free to ask clarifying questions if more context is needed.
 '''
+}
 
+# Use st.selectbox to let the user select a template
+selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
+
+# Set the system_message based on the user's selection
+template = templates[selected_template]
 system_message = SystemMessagePromptTemplate.from_template(template=template)
 PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
+
+conversation = ConversationChain(
+    llm=chat,
+    prompt=PROMPT,
+    verbose=False, 
+    memory=memory,
+)
+# template =  '''
+# You are a Tax professional. 
+# You are talking to a junior accountant. 
+# Please answer as honestly as possible. 
+# Please feel free to ask clarifying questions if more context is needed. 
+# If asked to calculate anything, do not assume any numerical dollar values, ask for exact amounts.
+# '''
+
+# system_message = SystemMessagePromptTemplate.from_template(template=template)
+# PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
 
 conversation = ConversationChain(
     llm=chat,
@@ -51,7 +89,15 @@ if st.button('Send'):
         
         # Display the AI's response
         st.write(response)
-#Now the text input box will always be displayed, and when you click the "Send" button, the response from the bot will be printed below the button.
+
+#2nd iteration of code                  didnt capture conversation history
+# Always display the text input box
+# user_input = st.text_input("Please enter your message:")
+
+# if st.button('Send'):
+#     if user_input:
+#         response = conversation.predict(input=user_input)
+#         st.write(response)
 
 
 
