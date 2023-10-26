@@ -1,10 +1,14 @@
 import streamlit as st
+import os
 from config import openai_api_key
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
+
+openai_api_key=os.environ['OPENAI_API_KEY']
+st.title('TaxBot')
 
 chat = ChatOpenAI(openai_api_key=openai_api_key)
 memory = ConversationBufferMemory()
