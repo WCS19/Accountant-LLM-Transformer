@@ -31,11 +31,26 @@ conversation = ConversationChain(
     memory=memory,
 )
 
-def chat_with_bot():
-    user_input = st.text_input("Please enter your message:")
+# Always display the text input box
+user_input = st.text_input("Please enter your message:")
+
+if st.button('Send'):
     if user_input:
         response = conversation.predict(input=user_input)
         st.write(response)
+#Now the text input box will always be displayed, and when you click the "Send" button, the response from the bot will be printed below the button.
 
-if st.button('Send'):
-    chat_with_bot()
+
+
+
+
+
+#initial code, commenting out to test streamlit functionality
+# def chat_with_bot():
+#     user_input = st.text_input("Please enter your message:")
+#     if user_input:
+#         response = conversation.predict(input=user_input)
+#         st.write(response)
+
+# if st.button('Send'):
+#     chat_with_bot()
