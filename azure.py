@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from config import openai_api_key
+# from config import openai_api_key
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
