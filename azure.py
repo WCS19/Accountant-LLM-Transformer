@@ -31,12 +31,25 @@ conversation = ConversationChain(
     memory=memory,
 )
 
+# Initialize session state for conversation history if it doesn't exist
+if 'conversation_history' not in st.session_state:
+    st.session_state.conversation_history = []
+
 # Always display the text input box
 user_input = st.text_input("Please enter your message:")
 
 if st.button('Send'):
     if user_input:
-        response = conversation.predict(input=user_input)
+        # Update the conversation history with the user's input
+        st.session_state.conversation_history.append(f"Human: {user_input}")
+        
+        # Predict the response based on the conversation history
+        response = conversation.predict(input="\n".join(st.session_state.conversation_history))
+        
+        # Update the conversation history with the AI's response
+        st.session_state.conversation_history.append(f"AI: {response}")
+        
+        # Display the AI's response
         st.write(response)
 #Now the text input box will always be displayed, and when you click the "Send" button, the response from the bot will be printed below the button.
 
