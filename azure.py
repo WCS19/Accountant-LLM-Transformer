@@ -11,7 +11,7 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 openai_api_key=os.environ['OPENAI_API_KEY']
 
 #App Name
-st.title('TaxBot')
+st.title('Accounting Assistant')
 
 # Initialize the chat model and memory
 chat = ChatOpenAI(openai_api_key=openai_api_key)
