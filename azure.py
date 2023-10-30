@@ -115,7 +115,6 @@ conversation = ConversationChain(
     prompt=PROMPT,
     verbose=False, #set verbose to false to hide the conversation history on frontend 
     memory=memory,
-    temperature = .9
 )
 
 # Initialize session state for conversation history if it doesn't already exist
