@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import pandas as pd
 
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
@@ -109,12 +108,6 @@ template = templates[selected_version][selected_template]
 system_message = SystemMessagePromptTemplate.from_template(template=template)
 PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
 
-# conversation = ConversationChain(
-#     llm=chat,
-#     prompt=PROMPT,
-#     verbose=False, 
-#     memory=memory,
-# )
 
 #Initialize conversation chain
 conversation = ConversationChain(
