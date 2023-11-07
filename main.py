@@ -12,7 +12,8 @@ from langchain.prompts import MessagesPlaceholder
 
 
 
-chat = ChatOpenAI(openai_api_key=openai_api_key)
+chat = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4-1106-preview") #adding model arg to use gpt-4-1106-preview
+
 
 memory = ConversationBufferMemory()
 

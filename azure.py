@@ -14,7 +14,7 @@ openai_api_key=os.environ['OPENAI_API_KEY']
 st.title('Accounting Assistant')
 
 # Initialize the chat model and memory
-chat = ChatOpenAI(openai_api_key=openai_api_key)
+chat = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4-1106-preview") #adding model arg to use gpt-4-1106-preview
 memory = ConversationBufferMemory()
 
 
