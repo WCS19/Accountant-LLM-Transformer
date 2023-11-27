@@ -90,16 +90,26 @@ if uploaded_file is not None:
 # Display textbox outside of button send logic
 user_input = st.text_input("Please enter your question:")
 
+
 if st.button('Send'):
+    # Initialize conversation history if it doesn't exist
+    if 'conversation_history' not in st.session_state:
+        st.session_state.conversation_history = []
+
+    # Append string data from uploaded file to conversation history
+    if string_data:
+        st.session_state.conversation_history.append(f"File Content: {string_data}")
+
+    # Append user input to conversation history
+    
     if user_input:
-        # Update the conversation history with the user's input
         st.session_state.conversation_history.append(f"Human: {user_input}")
-        
+
         # Predict the response based on the conversation history
         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
         
         # Update the conversation history with the AI's response
         st.session_state.conversation_history.append(f"AI: {response}")
-        
+            
         # Display the AI's response
         st.write(response)
