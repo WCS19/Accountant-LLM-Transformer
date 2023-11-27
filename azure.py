@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import pandas as pd
+from io import StringIO
 
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
