@@ -100,8 +100,10 @@ if st.button('Send'):
     if string_data:
         st.session_state.conversation_history.append(f"File Content: {string_data}")
 
+    if df:
+        st.session_state.conversation_history.append(f"File Content: {df}")
     # Append user input to conversation history
-    
+
     if user_input:
         st.session_state.conversation_history.append(f"Human: {user_input}")
 
