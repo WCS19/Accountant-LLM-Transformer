@@ -15,9 +15,12 @@ openai_api_key=os.environ['OPENAI_API_KEY']
 #App Name
 st.title('Accounting Assistant')
 
+
 # Initialize the chat model and memory
 chat = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4-1106-preview") #adding model arg to use gpt-4-1106-preview
 memory = ConversationBufferMemory()
+string_data = ""
+df = ""
 
 
 # Define multiple nested templates for prompt engineering prototyping
