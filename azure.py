@@ -70,7 +70,22 @@ conversation = ConversationChain(
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
-#Display textbox outside of button send logic
+# File uploader
+uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"])
+if uploaded_file is not None:
+    # Reading the file as a string or as a DataFrame using Pandas
+    if uploaded_file.name.endswith('.csv'):
+        df = pd.read_csv(uploaded_file)
+        st.write(df)
+    elif uploaded_file.name.endswith('.xlsx'):
+        df = pd.read_excel(uploaded_file)
+        st.write(df)
+    else:
+        # For text files
+        string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
+        st.write(string_data)
+
+# Display textbox outside of button send logic
 user_input = st.text_input("Please enter your question:")
 
 if st.button('Send'):
