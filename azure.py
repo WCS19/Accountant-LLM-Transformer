@@ -47,7 +47,7 @@ templates = {
 
 
 # Let the user select the respective buesiness vertical
-selected_template = st.selectbox("Choose a business vertical to continue:")
+selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
 
 # Set the system template based on previous selections
 template = templates[selected_template]
