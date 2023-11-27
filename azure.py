@@ -100,10 +100,10 @@ if st.button('Send'):
         st.session_state.conversation_history = []
 
     # Append string data from uploaded file to conversation history
-    if string_data:
+    if string_data is not "":
         st.session_state.conversation_history.append(f"File Content: {string_data}")
 
-    if df:
+    if df is not "":
         st.session_state.conversation_history.append(f"File Content: {df}")
     # Append user input to conversation history
 
