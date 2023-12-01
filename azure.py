@@ -64,7 +64,7 @@ template = templates[selected_template]
 
 # Define prompt template to set contextual scope
 system_message = SystemMessagePromptTemplate.from_template(template=template)
-PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
+PROMPT = PromptTemplate(input_variables=['history', 'input', 'number'], template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
 
 
 #Initialize conversation chain
