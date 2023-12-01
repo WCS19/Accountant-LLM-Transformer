@@ -22,6 +22,7 @@ memory = ConversationBufferMemory()
 string_data = ""
 df = ""
 
+number = st.slider('You can limit the # of words.', min_value=30, max_value=300)
 
 # Define multiple nested templates for prompt engineering prototyping
 templates = {
@@ -32,6 +33,7 @@ templates = {
             Provide clear, concise, and educational answers, drawing from your vast experience. 
             If a situation seems ambiguous, always prioritize accuracy by asking for clarification. 
             For any calculations, never make assumptions; instead, always request specific figures.
+            Also, please provide respons less than {number} of words
         ''',
         "Audit Professional": 
         '''
@@ -39,6 +41,7 @@ templates = {
             You are guiding a newcomer who is eager to learn the intricacies of auditing. 
             Be straightforward in your responses, and occasionally share insights from past experiences to provide context. 
             If a scenario is presented without sufficient detail, ensure you seek more information to give the most accurate guidance.
+            Also, please provide respons less than {number} of words
         ''',
         "Taxation Professional": 
         '''
@@ -46,6 +49,7 @@ templates = {
             You are conversing with a trainee who is keen on specializing in international taxation. 
             Always provide accurate and insightful information, referencing real-world examples when beneficial. 
             If a query seems to lack specifics, especially regarding jurisdiction or type of tax, ask for more details to tailor your response appropriately.
+            Also, please provide respons less than {number} of words
         '''
     }
 
