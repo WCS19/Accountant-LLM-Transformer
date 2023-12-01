@@ -45,14 +45,14 @@ def update_conversation_history(user_input, string_data, df):
     if user_input:
         st.session_state.conversation_history.append(f"Human: {user_input}")
 
-def generate_ai_response(user_input, number):
+def generate_ai_response(conversation, user_input, number):
     conversation_input = {
         "history": "\n".join(st.session_state.conversation_history),
         "input": user_input,
         "number": number
     }
 
-    response = conversation.predict(conversation_input)
+    response = conversation.predict(input=conversation_input)
     st.session_state.conversation_history.append(f"AI: {response}")
     return response
 
@@ -115,7 +115,8 @@ if string_data:
 # User input
 user_input = st.text_input("Please enter your question:")
 
+# Send button
 if st.button('Send'):
     update_conversation_history(user_input, string_data, df)
-    response = generate_ai_response(user_input, number)
+    response = generate_ai_response(conversation, user_input, number)
     st.write(response)
