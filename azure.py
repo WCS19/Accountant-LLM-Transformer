@@ -114,8 +114,14 @@ if st.button('Send'):
     if user_input:
         st.session_state.conversation_history.append(f"Human: {user_input}")
 
+        conversation_input = {
+        "history": "\n".join(st.session_state.conversation_history),
+        "input": user_input,
+        "number": number  # Pass the number variable from the slider
+    }
+
         # Predict the response based on the conversation history
-        response = conversation.predict(input="\n".join(st.session_state.conversation_history))
+        response = conversation.predict(conversation_input)
         
         # Update the conversation history with the AI's response
         st.session_state.conversation_history.append(f"AI: {response}")
