@@ -11,7 +11,7 @@ from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 #pull openAI key from Azure config
-openai_api_key="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"
+openai_api_key="sk-XXXXX"
 
 #App Name
 st.title('Accounting Assistant')
