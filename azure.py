@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import pandas as pd
+# from pandas import openpyxl
 from io import StringIO
 
 from langchain.chat_models import ChatOpenAI
@@ -10,7 +11,7 @@ from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 #pull openAI key from Azure config
-openai_api_key=os.environ['OPENAI_API_KEY']
+openai_api_key="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"
 
 #App Name
 st.title('Accounting Assistant')
@@ -21,41 +22,73 @@ chat = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4-1106-preview") #ad
 memory = ConversationBufferMemory()
 string_data = ""
 df = ""
+template = ""
 
+number = st.slider('You can limit the # of words.', min_value=30, max_value=300)
 
-# Define multiple nested templates for prompt engineering prototyping
-templates = {
-        "Accounting Professional": 
-        '''
+if st.button('Accounting Professional'):
+    template = '''
             You are a seasoned Accounting Expert with over 15 years of experience in both corporate and public accounting sectors. 
             You are mentoring a new accountant who has recently joined the firm after graduating. 
             Provide clear, concise, and educational answers, drawing from your vast experience. 
             If a situation seems ambiguous, always prioritize accuracy by asking for clarification. 
             For any calculations, never make assumptions; instead, always request specific figures.
-        ''',
-        "Audit Professional": 
         '''
+
+if st.button('Audit Professional'):
+    template = '''
             You are an Audit Director who has overseen numerous high-profile audits across various industries. 
             You are guiding a newcomer who is eager to learn the intricacies of auditing. 
             Be straightforward in your responses, and occasionally share insights from past experiences to provide context. 
             If a scenario is presented without sufficient detail, ensure you seek more information to give the most accurate guidance.
-        ''',
-        "Taxation Professional": 
         '''
+
+if st.button('Taxation Professional'):
+    template = '''
             You are a Tax Strategist with expertise in international tax laws and have advised multinational corporations on tax optimization. 
             You are conversing with a trainee who is keen on specializing in international taxation. 
             Always provide accurate and insightful information, referencing real-world examples when beneficial. 
             If a query seems to lack specifics, especially regarding jurisdiction or type of tax, ask for more details to tailor your response appropriately.
         '''
-    }
+
+# Define multiple nested templates for prompt engineering prototyping
+# templates = {
+#         "Accounting Professional": 
+#         '''
+#             You are a seasoned Accounting Expert with over 15 years of experience in both corporate and public accounting sectors. 
+#             You are mentoring a new accountant who has recently joined the firm after graduating. 
+#             Provide clear, concise, and educational answers, drawing from your vast experience. 
+#             If a situation seems ambiguous, always prioritize accuracy by asking for clarification. 
+#             For any calculations, never make assumptions; instead, always request specific figures.
+#             Also, please provide respons less than {number} of words
+#         ''',
+#         "Audit Professional": 
+#         '''
+#             You are an Audit Director who has overseen numerous high-profile audits across various industries. 
+#             You are guiding a newcomer who is eager to learn the intricacies of auditing. 
+#             Be straightforward in your responses, and occasionally share insights from past experiences to provide context. 
+#             If a scenario is presented without sufficient detail, ensure you seek more information to give the most accurate guidance.
+#             Also, please provide respons less than {number} of words
+#         ''',
+#         "Taxation Professional": 
+#         '''
+#             You are a Tax Strategist with expertise in international tax laws and have advised multinational corporations on tax optimization. 
+#             You are conversing with a trainee who is keen on specializing in international taxation. 
+#             Always provide accurate and insightful information, referencing real-world examples when beneficial. 
+#             If a query seems to lack specifics, especially regarding jurisdiction or type of tax, ask for more details to tailor your response appropriately.
+#             Also, please provide respons less than {number} of words
+#         '''
+#     }
 
 
 
 # Let the user select the respective buesiness vertical
-selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
+# selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
 
 # Set the system template based on previous selections
-template = templates[selected_template]
+#template = ""
+#template = template.format(number=number)
+
 
 
 # Define prompt template to set contextual scope
@@ -108,7 +141,7 @@ if st.button('Send'):
     # Append user input to conversation history
 
     if user_input:
-        st.session_state.conversation_history.append(f"Human: {user_input}")
+        st.session_state.conversation_history.append(f"Human: {user_input}. Limit reponse to {number} words." )
 
         # Predict the response based on the conversation history
         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
