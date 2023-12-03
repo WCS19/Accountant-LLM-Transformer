@@ -9,6 +9,10 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
+
+#Hardcoded open api key for local testing 
+openai_api_key='sk-xxx'
+
 # Function to initialize the chat model and memory
 def initialize_chat_model(api_key, model_name):
     chat = ChatOpenAI(openai_api_key=api_key, model=model_name)
@@ -42,6 +46,11 @@ def get_templates():
         '''
     }
 
+# Function to reset the conversation
+def reset_conversation():
+    st.session_state.conversation_history = []
+    initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
+
 # Function to handle file uploads
 def handle_file_upload():
     uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"])
@@ -55,14 +64,25 @@ def handle_file_upload():
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
     return df, string_data
 
-# Function to process and display user input and AI response
+# # Function to process and display user input and AI response
+# def process_user_input(conversation, df, string_data):
+#     user_input = st.text_input("Please enter your question:")
+#     if st.button('Send'):
+#         update_conversation_history(user_input, df, string_data)
+#         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
+#         st.session_state.conversation_history.append(f"AI: {response}")
+#         st.write(response)
+
+# Modified process_user_input function
 def process_user_input(conversation, df, string_data):
     user_input = st.text_input("Please enter your question:")
     if st.button('Send'):
         update_conversation_history(user_input, df, string_data)
         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
         st.session_state.conversation_history.append(f"AI: {response}")
-        st.write(response)
+        # Display the entire conversation history
+        for entry in st.session_state.conversation_history:
+            st.write(entry)
 
 # Function to update conversation history
 def update_conversation_history(user_input, df=None, string_data=None):
@@ -79,7 +99,7 @@ def update_conversation_history(user_input, df=None, string_data=None):
 # Main function to run the app
 def main():
     st.title('Accounting Assistant')
-    openai_api_key='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'
+    openai_api_key=openai_api_key
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
     templates = get_templates()
     selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
