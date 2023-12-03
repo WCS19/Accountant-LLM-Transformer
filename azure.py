@@ -112,11 +112,34 @@ if df is not None:
 if string_data:
     st.write(string_data)
 
-# User input
-user_input = st.text_input("Please enter your question:")
+st.divider()
+st.subheader("🤖💬 Chat Bot")
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Send button
-if st.button('Send'):
-    update_conversation_history(user_input, string_data, df)
-    response = generate_ai_response(conversation, user_input, number)
-    st.write(response)
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+
+# React to user input
+if prompt := st.chat_input("Please enter your question"):
+    # Display user message in chat message container
+    st.chat_message("user").markdown(prompt)
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    #update_conversation_history(prompt, string_data, df)
+    #response = generate_ai_response(conversation, prompt, number)
+    response = f"Echo: {prompt}{number}"
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        st.markdown(response)
+    # Add assistant response to chat history
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+# User input
+#user_input = st.chat_input("Please enter your question")
+#user_input = st.text_input("Please enter your question:")
