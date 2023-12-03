@@ -13,6 +13,18 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 #Hardcoded open api key for local testing 
 openai_api_key='sk-x'
 
+def show_instructions_page(): 
+    st.title("Application Overview & Instructions")
+    st.write("Welcome to the Accounting Assistant!")
+    st.markdown("""
+        ### How to Use This Application
+        - Choose a business vertical from the dropdown menu that best suites your business needs.
+        - Set your preferred verbosity level, from Low, Medium, to High, to ensure the ouput response matches your needed level of detail.
+        - Upload any relevant files (csv, xlsx, txt) if you need help with analysis.
+        - Enter your question in the text input box.
+        - Click 'Send' to get a response.
+        - Use 'Reset Conversation' to start over and clear conversation history.
+    """)
 
 # Function to initialize the chat model and memory
 def initialize_chat_model(api_key, model_name):
@@ -58,13 +70,6 @@ def get_templates():
         '''
     }
 
-
-# Function to reset the conversation
-def reset_conversation():
-    st.session_state.conversation_history = []
-    initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
-
-
 # Function to handle file uploads
 def handle_file_upload():
     uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"])
@@ -78,8 +83,7 @@ def handle_file_upload():
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
     return df, string_data
 
-
-# Modified process_user_input function
+#Function to process user input
 def process_user_input(conversation, df, string_data):
     user_input = st.text_input("Please enter your question:")
     if st.button('Send'):
@@ -100,17 +104,20 @@ def update_conversation_history(user_input, df=None, string_data=None):
         st.session_state.conversation_history.append(f"File Content: {df}")
     if user_input:
         st.session_state.conversation_history.append(f"You: {user_input}")
+        
+
+# Function to reset the conversation
+def reset_conversation():
+    st.session_state.conversation_history = []
+    initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
 
-# Main Application
-
-#Pull openAI key from Azure config
-# openai_api_key=os.environ['OPENAI_API_KEY'] #uncomment to run on Azure
-
-# Main function to run the app
-def main():
+# Function to show the application page
+def show_application_page():
     st.title('Accounting Assistant')
     # Initialize the chat model and memory
+    #Pull openAI key from Azure config
+    #openai_api_key=os.environ['OPENAI_API_KEY'] #uncomment to run on Azure
     openai_api_key = 'sk-x'
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
     # Retrieve templates
@@ -138,7 +145,17 @@ def main():
     if st.button("Reset Conversation"):
         reset_conversation()
 
-# Run the app
+#Function to show navigation and application pages
+def main():
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Select a Page", ["Application Instructions & Overview", "Accounting Assistant"])
+
+    if page == "Application Instructions & Overview":
+        show_instructions_page()
+    elif page == "Accounting Assistant":
+        show_application_page()
+
+
 if __name__ == "__main__":
     main()
 
