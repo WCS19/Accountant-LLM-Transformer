@@ -100,12 +100,12 @@ def get_templates():
 
 # Function to handle file uploads
 def handle_file_upload():
-    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlxs", "txt"]) #testing xlxs file type
+    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"]) #testing xlxs file type
     df, string_data = None, None
     if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.endswith('.xlxs'): #testing
+        elif uploaded_file.name.endswith('.xlsx'): #testing
             df = pd.read_excel(uploaded_file)
         else:
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
