@@ -10,9 +10,6 @@ from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 
-#Hardcoded open api key for local testing 
-openai_api_key='sk-x'
-
 def show_instructions_page():
     st.title("Accounting Assistant Overview & Instructions")
     st.write("Welcome to the Accounting Assistant!")
@@ -20,7 +17,7 @@ def show_instructions_page():
         ### How to Use This Application
         - Choose a business vertical from the dropdown menu that best suits your business needs.
         - Set your preferred verbosity level, from Low, Medium, to High, to ensure the output response matches your needed level of detail.
-        - Upload any relevant files (csv, xlsx, txt) if you need help with analysis.
+        - Upload any relevant files (csv, txt) if you need help with analysis.
         - Enter your question in the text input box.
         - Click 'Send' to get a response.
         - Use 'Reset Conversation' to start over and clear conversation history.
@@ -30,27 +27,36 @@ def show_instructions_page():
         - Below are some example questions. Click on any of these to see a sample response:
                 """
     )
-    if st.button('Can you explain to me how to reconcile a bank statement?'):
+
+    #Buttons lack logic to correctly select the corresponding template.
+    if st.button('Accounting: Can you explain to me how to reconcile a bank statement?'):
         st.session_state['preset_input'] = 'Can you explain to me how to reconcile a bank statement'
         st.session_state['current_page'] = 'Application'  # Set the current page to Application
 
-    if st.button(''):
-        st.session_state['preset_input'] = ''
+    if st.button('Audit: How do I test depreciation?'):
+        st.session_state['preset_input'] = 'How do I test depreciation?'
         st.session_state['current_page'] = 'Application'  # Set the current page to Application
+
+    if st.button('Taxation: How do I determine the number of dependents?'):
+        st.session_state['preset_input'] = 'How do I determine the number of dependents?'
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
+        
 
 
     st.markdown("""
                 To view a sample response:
             - Click on the example you're interested in.
-            - The application will automatically switch to the 'Application' page.
+            - Please manually switch to the 'Application' page.
             - There, you'll find the selected example query already running.
             - A sample response based on the chosen query will be displayed.
+            - If you would like to begin asking the Chat Bot question, hit "Reset Conversation".
             - If you wish to return to this page or navigate to other sections, use the navigation bar on the sidebar.
 """)
 
 # Function to initialize the chat model and memory
 def initialize_chat_model(api_key, model_name):
-    chat = ChatOpenAI(openai_api_key=api_key, model=model_name)
+    openai_api_key=os.environ['OPENAI_API_KEY']
+    chat = ChatOpenAI(openai_api_key=openai_api_key, model=model_name)
     memory = ConversationBufferMemory()
     return chat, memory
 
@@ -94,13 +100,11 @@ def get_templates():
 
 # Function to handle file uploads
 def handle_file_upload():
-    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"])
+    uploaded_file = st.file_uploader("Upload a file", type=["csv", "txt"])
     df, string_data = None, None
     if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
-        elif uploaded_file.name.endswith('.xlsx'):
-            df = pd.read_excel(uploaded_file)
         else:
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
     return df, string_data
@@ -136,6 +140,7 @@ def update_conversation_history(user_input, df=None, string_data=None):
 
 # Function to reset the conversation
 def reset_conversation():
+    openai_api_key=os.environ['OPENAI_API_KEY']
     st.session_state.conversation_history = []
     initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
@@ -144,10 +149,8 @@ def reset_conversation():
 # Function to show the application page
 def show_application_page():                                          #Version with CHAT BOT WRITTEN AT TOP
     st.title('Accounting Assistant')
-    
-    # Pull openAI key from Azure config
-    # openai_api_key=os.environ['OPENAI_API_KEY']  # uncomment to run on Azure
-    openai_api_key = 'sk-x'
+    openai_api_key=os.environ['OPENAI_API_KEY']  
+    openai_api_key = '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'
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
     templates = get_templates()
