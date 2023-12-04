@@ -9,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-
+#markdown includes xlxs file type (may need to remove if testing fails)
 def show_instructions_page():
     st.title("Accounting Assistant Overview & Instructions")
     st.write("Welcome to the Accounting Assistant!")
@@ -17,7 +17,7 @@ def show_instructions_page():
         ### How to Use This Application
         - Choose a business vertical from the dropdown menu that best suits your business needs.
         - Set your preferred verbosity level, from Low, Medium, to High, to ensure the output response matches your needed level of detail.
-        - Upload any relevant files (csv, txt) if you need help with analysis.
+        - Upload any relevant files (csv, xlxs, txt) if you need help with analysis. 
         - Enter your question in the text input box.
         - Click 'Send' to get a response.
         - Use 'Reset Conversation' to start over and clear conversation history.
@@ -100,11 +100,13 @@ def get_templates():
 
 # Function to handle file uploads
 def handle_file_upload():
-    uploaded_file = st.file_uploader("Upload a file", type=["csv", "txt"])
+    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlxs", "txt"]) #testing xlxs file type
     df, string_data = None, None
     if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
+        elif uploaded_file.name.endswith('.xlxs'): #testing
+            df = pd.read_excel(uploaded_file)
         else:
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
     return df, string_data
