@@ -9,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-#markdown includes xlxs file type (may need to remove if testing fails)
+#markdown includes xlsx file type (may need to remove if testing fails)
 def show_instructions_page():
     st.title("Accounting Assistant Overview & Instructions")
     st.write("Welcome to the Accounting Assistant!")
@@ -17,7 +17,7 @@ def show_instructions_page():
         ### How to Use This Application
         - Choose a business vertical from the dropdown menu that best suits your business needs.
         - Set your preferred verbosity level, from Low, Medium, to High, to ensure the output response matches your needed level of detail.
-        - Upload any relevant files (csv, xlxs, txt) if you need help with analysis. 
+        - Upload any relevant files (csv, xlsx, txt) if you need help with analysis. 
         - Enter your question in the text input box.
         - Click 'Send' to get a response.
         - Use 'Reset Conversation' to start over and clear conversation history.
@@ -100,7 +100,7 @@ def get_templates():
 
 # Function to handle file uploads
 def handle_file_upload():
-    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"]) #testing xlxs file type
+    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"]) #testing xlsx file type
     df, string_data = None, None
     if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
@@ -140,7 +140,7 @@ def update_conversation_history(user_input, df=None, string_data=None):
     if df is not None and not df.empty:
         st.session_state.conversation_history.append(f"File Content: {df}")
     if user_input:
-        st.session_state.conversation_history.append(f"You: {user_input}")
+        st.session_state.conversation_history.append(f"You: {user_input}")  #consdier moving to beginning of if statement chain
         
 
 # Function to reset the conversation
@@ -155,7 +155,6 @@ def reset_conversation():
 def show_application_page():                                          #Version with CHAT BOT WRITTEN AT TOP
     st.title('Accounting Assistant')
     openai_api_key=os.environ['OPENAI_API_KEY']  
-    openai_api_key = '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'
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
     templates = get_templates()
