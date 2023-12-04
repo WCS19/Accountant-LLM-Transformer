@@ -105,10 +105,13 @@ def handle_file_upload():
     if uploaded_file:
         if uploaded_file.name.endswith('.csv'):
             df = pd.read_csv(uploaded_file)
+            st.write(df)
         elif uploaded_file.name.endswith('.xlsx'): #testing
             df = pd.read_excel(uploaded_file)
+            st.write(df)
         else:
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
+            st.write(string_data)
     return df, string_data
 
 
