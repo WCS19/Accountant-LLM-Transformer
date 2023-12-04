@@ -13,18 +13,40 @@ from langchain.prompts import ChatPromptTemplate, PromptTemplate
 #Hardcoded open api key for local testing 
 openai_api_key='sk-x'
 
-def show_instructions_page(): 
-    st.title("Application Overview & Instructions")
+def show_instructions_page():
+    st.title("Accounting Assistant Overview & Instructions")
     st.write("Welcome to the Accounting Assistant!")
     st.markdown("""
         ### How to Use This Application
-        - Choose a business vertical from the dropdown menu that best suites your business needs.
-        - Set your preferred verbosity level, from Low, Medium, to High, to ensure the ouput response matches your needed level of detail.
+        - Choose a business vertical from the dropdown menu that best suits your business needs.
+        - Set your preferred verbosity level, from Low, Medium, to High, to ensure the output response matches your needed level of detail.
         - Upload any relevant files (csv, xlsx, txt) if you need help with analysis.
         - Enter your question in the text input box.
         - Click 'Send' to get a response.
         - Use 'Reset Conversation' to start over and clear conversation history.
     """)
+    st.markdown("""
+         ### Example Questions:
+        - Below are some example questions. Click on any of these to see a sample response:
+                """
+    )
+    if st.button('Can you explain to me how to reconcile a bank statement?'):
+        st.session_state['preset_input'] = 'Can you explain to me how to reconcile a bank statement'
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
+
+    if st.button(''):
+        st.session_state['preset_input'] = ''
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
+
+
+    st.markdown("""
+                To view a sample response:
+            - Click on the example you're interested in.
+            - The application will automatically switch to the 'Application' page.
+            - There, you'll find the selected example query already running.
+            - A sample response based on the chosen query will be displayed.
+            - If you wish to return to this page or navigate to other sections, use the navigation bar on the sidebar.
+""")
 
 # Function to initialize the chat model and memory
 def initialize_chat_model(api_key, model_name):
@@ -83,16 +105,22 @@ def handle_file_upload():
             string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
     return df, string_data
 
-#Function to process user input
-def process_user_input(conversation, df, string_data):
-    user_input = st.text_input("Please enter your question:")
-    if st.button('Send'):
+
+# Function to process and display user input and AI response
+def process_user_input(conversation, df, string_data, preset_input=None):
+    if preset_input:
+        user_input = preset_input
+    else:
+        user_input = st.text_input("Please enter your question:")
+
+    if st.button('Send') or preset_input:
         update_conversation_history(user_input, df, string_data)
         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
         st.session_state.conversation_history.append(f"AI: {response}")
         # Display the entire conversation history
         for entry in st.session_state.conversation_history:
             st.write(entry)
+
 
 # Function to update conversation history
 def update_conversation_history(user_input, df=None, string_data=None):
@@ -112,50 +140,67 @@ def reset_conversation():
     initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
 
+
 # Function to show the application page
-def show_application_page():
+def show_application_page():                                          #Version with CHAT BOT WRITTEN AT TOP
     st.title('Accounting Assistant')
-    # Initialize the chat model and memory
-    #Pull openAI key from Azure config
-    #openai_api_key=os.environ['OPENAI_API_KEY'] #uncomment to run on Azure
+    
+    # Pull openAI key from Azure config
+    # openai_api_key=os.environ['OPENAI_API_KEY']  # uncomment to run on Azure
     openai_api_key = 'sk-x'
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
-    # Retrieve templates
+
     templates = get_templates()
-    # Add a slider for verbosity selection
     verbosity = st.select_slider("Select response verbosity", 
                                  options=['Low', 'Medium', 'High'],
                                  value='Medium')  # Default value set to 'Medium'
-    # Get the verbosity instruction based on the selection
     verbosity_instruction = get_verbosity_instruction(verbosity)
-    # User selects a business vertical
     selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
-    # Append the verbosity instruction to the selected template
+
     template_with_verbosity = templates[selected_template] + "\n\n" + verbosity_instruction
-    # Set up the system message and prompt template
-    system_message = SystemMessagePromptTemplate.from_template(template=template_with_verbosity)
+
+    # system_message = SystemMessagePromptTemplate.from_template(template=template_with_verbosity)
     PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template_with_verbosity + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
-    # Create the conversation chain
     conversation = ConversationChain(llm=chat, prompt=PROMPT, verbose=False, memory=memory)
-    # Handle file upload
+
     df, string_data = handle_file_upload()
-    # Process user input
-    process_user_input(conversation, df, string_data)
-    # Add a reset button
+
+    # Chat Divider and Subheader
+    st.divider()
+    st.subheader("🤖💬 Chat Bot")
+
+    # Check for and handle preset input
+    if 'preset_input' in st.session_state and st.session_state['preset_input']:
+        process_user_input(conversation, df, string_data, st.session_state['preset_input'])
+        st.session_state['preset_input'] = None  # Reset the preset input
+    else:
+        process_user_input(conversation, df, string_data)
+
     if st.button("Reset Conversation"):
         reset_conversation()
 
-#Function to show navigation and application pages
+
+
 def main():
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Select a Page", ["Application Instructions & Overview", "Accounting Assistant"])
-
-    if page == "Application Instructions & Overview":
+    # Initialize the current page in session_state if not already set
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = 'Instructions'
+    page = st.sidebar.radio("Select a Page", ["Instructions", "Application"])
+    # Check for manual page switch
+    if page != st.session_state['current_page']:
+        st.session_state['current_page'] = page
+    # Display the selected page
+    if st.session_state['current_page'] == "Instructions":
         show_instructions_page()
-    elif page == "Accounting Assistant":
+    elif st.session_state['current_page'] == "Application":
         show_application_page()
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
 
