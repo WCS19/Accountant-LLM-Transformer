@@ -2,78 +2,79 @@ import streamlit as st
 import os
 import pandas as pd
 from io import StringIO
+
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts.chat import SystemMessagePromptTemplate
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
-# Function Definitions
-
-def initialize_conversation_chain():
-    template = templates[selected_template]
-    system_message = SystemMessagePromptTemplate.from_template(template=template)
-    prompt_template = PromptTemplate(
-        input_variables=['history', 'input', 'number'], 
-        template=template + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:'
+#markdown includes xlsx file type (may need to remove if testing fails)
+def show_instructions_page():
+    st.title("Accounting Assistant Overview & Instructions")
+    st.write("Welcome to the Accounting Assistant!")
+    st.markdown("""
+        ### How to Use This Application
+        - Choose a business vertical from the dropdown menu that best suits your business needs.
+        - Set your preferred verbosity level, from Low, Medium, to High, to ensure the output response matches your needed level of detail.
+        - Upload any relevant files (csv, xlsx, txt) if you need help with analysis. 
+        - Enter your question in the text input box.
+        - Click 'Send' to get a response.
+        - Use 'Reset Conversation' to start over and clear conversation history.
+    """)
+    st.markdown("""
+         ### Example Questions:
+        - Below are some example questions. Click on any of these to see a sample response:
+                """
     )
 
-    return ConversationChain(
-        llm=chat,
-        prompt=prompt_template,
-        verbose=False,
-        memory=memory,
-    )
+    #Buttons lack logic to correctly select the corresponding template.
+    if st.button('Accounting: Can you explain to me how to reconcile a bank statement?'):
+        st.session_state['preset_input'] = 'Can you explain to me how to reconcile a bank statement'
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
 
-def read_uploaded_file(uploaded_file):
-    if uploaded_file:
-        if uploaded_file.name.endswith('.csv'):
-            return pd.read_csv(uploaded_file), ""
-        elif uploaded_file.name.endswith('.xlsx'):
-            return pd.read_excel(uploaded_file), ""
-        else:
-            return None, StringIO(uploaded_file.getvalue().decode("utf-8")).read()
-    return None, ""
+    if st.button('Audit: How do I test depreciation?'):
+        st.session_state['preset_input'] = 'How do I test depreciation?'
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
 
-def update_conversation_history(user_input, string_data, df):
-    if string_data and string_data is not "":
-        st.session_state.conversation_history.append(f"File Content: {string_data}")
+    if st.button('Taxation: How do I determine the number of dependents?'):
+        st.session_state['preset_input'] = 'How do I determine the number of dependents?'
+        st.session_state['current_page'] = 'Application'  # Set the current page to Application
+        
 
-    if df is not None:
-        st.session_state.conversation_history.append(f"File Content: {df}")
 
-    if user_input:
-        st.session_state.conversation_history.append(f"Human: {user_input}")
+    st.markdown("""
+                To view a sample response:
+            - Click on the example you're interested in.
+            - Please manually switch to the 'Application' page.
+            - There, you'll find the selected example query already running.
+            - A sample response based on the chosen query will be displayed.
+            - If you would like to begin asking the Chat Bot question, hit "Reset Conversation".
+            - If you wish to return to this page or navigate to other sections, use the navigation bar on the sidebar.
+""")
 
-def generate_ai_response(conversation, user_input, number):
-    conversation_input = {
-        "history": "\n".join(st.session_state.conversation_history),
-        "input": user_input,
-        "number": number
-    }
+# Function to initialize the chat model and memory
+def initialize_chat_model(api_key, model_name):
+    openai_api_key=os.environ['OPENAI_API_KEY']
+    chat = ChatOpenAI(openai_api_key=openai_api_key, model=model_name)
+    memory = ConversationBufferMemory()
+    return chat, memory
 
-    response = conversation.predict(input=conversation_input)
-    st.session_state.conversation_history.append(f"AI: {response}")
-    return response
+# Function to get verbosity instruction
+def get_verbosity_instruction(verbosity):
+    if verbosity == 'Low':
+        return 'Please respond in a concise manner. Keep your answer short and to the point.'
+    elif verbosity == 'Medium':
+        return 'Please provide a balanced response with enough detail to be clear, but not overly verbose.'
+    elif verbosity == 'High':
+        return 'Feel free to provide detailed and comprehensive responses, elaborating as much as necessary.'
+    else:
+        return ''
 
-# Main Application
-
-#pull openAI key from Azure config
-openai_api_key=os.environ['OPENAI_API_KEY']
-
-#App Name
-st.title('Accounting Assistant')
-
-# Initialize the chat model and memory
-chat = ChatOpenAI(openai_api_key=openai_api_key, model="gpt-4-1106-preview")
-memory = ConversationBufferMemory()
-
-# Initialize session state for conversation history if it doesn't already exist
-if 'conversation_history' not in st.session_state:
-    st.session_state.conversation_history = []
-
-templates = {
-     "Accounting Professional": 
+# Function to define multiple nested templates
+def get_templates():
+    return {
+        "Accounting Professional": 
         '''
             You are a seasoned Accounting Expert with over 15 years of experience in both corporate and public accounting sectors. 
             You are mentoring a new accountant who has recently joined the firm after graduating. 
@@ -95,51 +96,121 @@ templates = {
             Always provide accurate and insightful information, referencing real-world examples when beneficial. 
             If a query seems to lack specifics, especially regarding jurisdiction or type of tax, ask for more details to tailor your response appropriately.
         '''
-}  # Define your templates here
+    }
 
-selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
+# Function to handle file uploads
+def handle_file_upload():
+    uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"]) #testing xlsx file type
+    df, string_data = None, None
+    if uploaded_file:
+        if uploaded_file.name.endswith('.csv'):
+            df = pd.read_csv(uploaded_file)
+            st.write(df)
+        elif uploaded_file.name.endswith('.xlsx'): #testing
+            df = pd.read_excel(uploaded_file)
+            st.write(df)
+        else:
+            string_data = StringIO(uploaded_file.getvalue().decode("utf-8")).read()
+            st.write(string_data)
+    return df, string_data
 
-number = st.slider('You can limit the # of words.', min_value=30, max_value=300)
 
-# Initialize conversation chain
-conversation = initialize_conversation_chain()
+# Function to process and display user input and AI response
+def process_user_input(conversation, df, string_data, preset_input=None):
+        
+    if  user_input := st.chat_input("Please enter your question"):
+        update_conversation_history(user_input, df, string_data)
+        response = conversation.predict(input="\n".join(st.session_state.conversation_history))
+        st.session_state.conversation_history.append(f"AI: {response}")
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        # Display the entire conversation history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+        #for entry in st.session_state.conversation_history:
+            #st.write(entry)
+        
 
-# File uploader and processing
-uploaded_file = st.file_uploader("Upload a file", type=["csv", "xlsx", "txt"])
-df, string_data = read_uploaded_file(uploaded_file)
-if df is not None:
-    st.write(df)
-if string_data:
-    st.write(string_data)
 
-st.divider()
-st.subheader("🤖💬 Chat Bot")
-# Initialize chat history
-if "messages" not in st.session_state:
+# Function to update conversation history
+def update_conversation_history(user_input, df=None, string_data=None):
+    if 'conversation_history' not in st.session_state:
+        st.session_state.conversation_history = []
+        st.session_state.messages = []
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    if string_data:
+        st.session_state.conversation_history.append(f"File Content: {string_data}")
+        st.session_state.messages.append({"role": "assistant", "content": string_data})
+    if df is not None and not df.empty:
+        st.session_state.conversation_history.append(f"File Content: {df}")
+        st.session_state.messages.append({"role": "assistant", "content": df})
+    if user_input:
+        st.session_state.conversation_history.append(f"You: {user_input}")
+        st.session_state.messages.append({"role": "user", "content": user_input})  #consdier moving to beginning of if statement chain
+        
+
+# Function to reset the conversation
+def reset_conversation():
+    openai_api_key=os.environ['OPENAI_API_KEY']
+    st.session_state.conversation_history = []
     st.session_state.messages = []
-
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
 
-# React to user input
-if prompt := st.chat_input("Please enter your question"):
-    # Display user message in chat message container
-    st.chat_message("user").markdown(prompt)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
 
-    #update_conversation_history(prompt, string_data, df)
-    #response = generate_ai_response(conversation, prompt, number)
-    response = f"Echo: {prompt}{number}"
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        st.markdown(response)
-    # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": response})
+# Function to show the application page
+def show_application_page():                                          #Version with CHAT BOT WRITTEN AT TOP
+    st.title('Accounting Assistant')
+    openai_api_key=os.environ['OPENAI_API_KEY']  
+    chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
-# User input
-#user_input = st.chat_input("Please enter your question")
-#user_input = st.text_input("Please enter your question:")
+    templates = get_templates()
+    verbosity = st.select_slider("Select response verbosity", 
+                                 options=['Low', 'Medium', 'High'],
+                                 value='Medium')  # Default value set to 'Medium'
+    verbosity_instruction = get_verbosity_instruction(verbosity)
+    selected_template = st.selectbox("Choose a business vertical to continue:", list(templates.keys()))
+
+    template_with_verbosity = templates[selected_template] + "\n\n" + verbosity_instruction
+
+    # system_message = SystemMessagePromptTemplate.from_template(template=template_with_verbosity)
+    PROMPT = PromptTemplate(input_variables=['history', 'input'], template=template_with_verbosity + '.\n\nCurrent conversation:\n{history}\nHuman: {input}\nAI:')
+    conversation = ConversationChain(llm=chat, prompt=PROMPT, verbose=False, memory=memory)
+
+    df, string_data = handle_file_upload()
+
+    # Chat Divider and Subheader
+    st.divider()
+    st.subheader("🤖💬 Chat Bot")
+
+    # Check for and handle preset input
+    if 'preset_input' in st.session_state and st.session_state['preset_input']:
+        process_user_input(conversation, df, string_data, st.session_state['preset_input'])
+        st.session_state['preset_input'] = None  # Reset the preset input
+    else:
+        process_user_input(conversation, df, string_data)
+
+    if st.button("Reset Conversation"):
+        reset_conversation()
+
+
+
+def main():
+    st.sidebar.title("Navigation")
+    # Initialize the current page in session_state if not already set
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = 'Instructions'
+    page = st.sidebar.radio("Select a Page", ["Instructions", "Application"])
+    # Check for manual page switch
+    if page != st.session_state['current_page']:
+        st.session_state['current_page'] = page
+    # Display the selected page
+    if st.session_state['current_page'] == "Instructions":
+        show_instructions_page()
+    elif st.session_state['current_page'] == "Application":
+        show_application_page()
+
+
+if __name__ == "__main__":
+    main()
