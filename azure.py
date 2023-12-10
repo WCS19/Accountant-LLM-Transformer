@@ -122,10 +122,11 @@ def process_user_input(conversation, df, string_data, preset_input=None):
         update_conversation_history(user_input, df, string_data)
         response = conversation.predict(input="\n".join(st.session_state.conversation_history))
         st.session_state.conversation_history.append(f"AI: {response}")
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"avatar":None,"role": "assistant", "content": response})
         # Display the entire conversation history
         for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
+            avatar=message["avatar"]
+            with st.chat_message(message["role"],avatar=avatar):
                 st.markdown(message["content"])
         #for entry in st.session_state.conversation_history:
             #st.write(entry)
@@ -141,13 +142,13 @@ def update_conversation_history(user_input, df=None, string_data=None):
         st.session_state.messages = []
     if string_data:
         st.session_state.conversation_history.append(f"File Content: {string_data}")
-        st.session_state.messages.append({"role": "assistant", "content": string_data})
+        st.session_state.messages.append({"avatar":"📋", "role": "File Content", "content": f"File Content: {string_data}"})
     if df is not None and not df.empty:
         st.session_state.conversation_history.append(f"File Content: {df}")
-        st.session_state.messages.append({"role": "assistant", "content": df})
+        st.session_state.messages.append({"avatar":"📋", "role": "File Content", "content": f"File Content: {df}"})
     if user_input:
         st.session_state.conversation_history.append(f"You: {user_input}")
-        st.session_state.messages.append({"role": "user", "content": user_input})  #consdier moving to beginning of if statement chain
+        st.session_state.messages.append({"avatar":None, "role": "user", "content": user_input})  #consdier moving to beginning of if statement chain
         
 
 # Function to reset the conversation
