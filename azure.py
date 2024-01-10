@@ -150,7 +150,7 @@ def reset_conversation():
 def show_application_page():                                          #Version with CHAT BOT WRITTEN AT TOP
     st.title('Accounting Assistant')
     openai_api_key=os.environ['OPENAI_API_KEY']  
-    openai_api_key = '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'
+    openai_api_key = XXX
     chat, memory = initialize_chat_model(api_key=openai_api_key, model_name="gpt-4-1106-preview")
 
     templates = get_templates()
